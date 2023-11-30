@@ -16,7 +16,7 @@ fn main() {
 
     log.push_str(match str::from_utf8(&output.stdout) {
         Ok(val) => val,
-        Err(_) => panic!("got non UTF-8 data from git"),
+        Err(_) => panic!("got non UTF-8 data"),
     });
 
     println!("{0}", log)

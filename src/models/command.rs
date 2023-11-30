@@ -1,9 +1,12 @@
 use clap::{command, Parser};
 
 #[derive(Parser, Debug)]
-#[command(about, long_about = None)]
+#[command(
+    author = "dakamakat", 
+    version, 
+    about = "Basic tool to execute commands in provided location", 
+    long_about = None)]
 pub struct ActionUnit {
-
     /// Actual command
     pub body: String,
 
