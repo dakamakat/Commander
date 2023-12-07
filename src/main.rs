@@ -1,22 +1,22 @@
-use std::process::Command;
-
-use clap::Parser;
-
 mod models;
 mod parser;
 mod store;
+
+use clap::Parser;
+use models::command::{ActionSubcommand, ActionType, FileSubcommand};
+use std::process::Command;
 
 fn main() {
     let val = models::command::ActionUnit::parse();
 
     match val.action_type {
-        models::command::ActionType::File(val) => match val.command {
-            models::command::FileSubcommand::Create(_val) => todo!(),
-            models::command::FileSubcommand::Delete => todo!(),
-            models::command::FileSubcommand::Show => todo!(),
+        ActionType::File(val) => match val.command {
+            FileSubcommand::Create(_val) => todo!(),
+            FileSubcommand::Delete => todo!(),
+            FileSubcommand::Show => todo!(),
         },
-        models::command::ActionType::Action(val) => match val.command {
-            models::command::ActionSubcommand::Invoke(val) => {
+        ActionType::Action(val) => match val.command {
+            ActionSubcommand::Invoke(val) => {
                 println!("body: {0} , path: {1} \n", val.body, val.path);
 
                 let output = Command::new(val.body)
