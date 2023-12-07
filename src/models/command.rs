@@ -38,9 +38,9 @@ pub enum FileSubcommand {
     /// Create file with commands
     Create(CreateFile),
     /// Delete file with commands
-    Delete,
+    Delete(DeleteFile),
     /// Show all content from file with commands
-    Show
+    Read(ReadFile)
 }
 
 #[derive(Debug, Subcommand)]
@@ -59,6 +59,20 @@ pub struct InvokeAction {
 
 #[derive(Debug, Args)]
 pub struct CreateFile {
+    /// name of the file
+    pub filename: String,
     /// Body of the command
     pub body: String,
+}
+
+#[derive(Debug, Args)]
+pub struct ReadFile {
+    /// name of the file
+    pub filename: String,
+}
+
+#[derive(Debug, Args)]
+pub struct DeleteFile {
+    /// name of the file
+    pub filename: String,
 }
