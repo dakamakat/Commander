@@ -1,11 +1,20 @@
 use std::{
-    fs::{self, File},
+    fs::{self, create_dir, File},
     io::{self, BufRead, BufReader, Write},
 };
 
-use anyhow::{Context, Result as AnyResult};
+use anyhow::{Context, Ok, Result as AnyResult};
 
-use crate::models::command::{CreateFile, DeleteFile, ReadFile};
+use crate::{
+    constants::filesystem_constants::
+        DEFAULT_COMMANDS_DIRECTORY_NAME
+    ,
+    models::command::{CreateFile, DeleteFile, ReadFile},
+};
+
+pub fn on_init() -> AnyResult<()> {
+    create_command_directory()
+}
 
 pub fn create_command_file(command: CreateFile) -> AnyResult<()> {
     let mut f = File::create(&command.filename).with_context(|| {
@@ -53,6 +62,17 @@ fn write_to_console(str: &String) -> AnyResult<()> {
     let mut handle = io::BufWriter::new(stdout);
 
     writeln!(handle, "{}", str).with_context(|| format!("could not print line"))?;
+
+    Ok(())
+}
+
+fn create_command_directory() -> AnyResult<()> {
+    create_dir(DEFAULT_COMMANDS_DIRECTORY_NAME).with_context(|| {
+        format!(
+            "Error trying to create directory with name {}",
+            DEFAULT_COMMANDS_DIRECTORY_NAME
+        )
+    })?;
 
     Ok(())
 }
