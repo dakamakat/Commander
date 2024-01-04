@@ -1,4 +1,5 @@
 mod actions;
+mod constants;
 mod models;
 mod parser;
 mod store;
@@ -7,9 +8,11 @@ use actions::invoke::invoke;
 use anyhow::Result;
 use clap::Parser;
 use models::command::{ActionSubcommand, ActionType, FileSubcommand};
-use store::filesystem::{create_command_file, delete_command_file, read_command_file};
+use store::filesystem::{create_command_file, delete_command_file, on_init, read_command_file};
 
 fn main() -> Result<()> {
+    let _on_init = on_init();
+
     let val = models::command::ActionUnit::parse();
 
     match val.action_type {
