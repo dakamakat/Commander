@@ -6,7 +6,7 @@ use clap::{command, Parser, Subcommand, Args};
     version, 
     about = "Basic tool to execute commands in provided location", 
     long_about = None)]
- pub struct ActionUnit {
+ pub struct Action {
     /// Type of action ( e.g storage change , command exec and etc
     #[clap(subcommand)]
     pub action_type: ActionType,
@@ -35,22 +35,32 @@ pub struct ActionCommand {
 
 #[derive(Debug, Subcommand)]
 pub enum FileSubcommand { 
+    /// add command to file
+    Add(AddCommand),
     /// Create file with commands
     Create(CreateFile),
     /// Delete file with commands
     Delete(DeleteFile),
     /// Show all content from file with commands
-    Read(ReadFile)
+    Display(ReadFile)
 }
 
 #[derive(Debug, Subcommand)]
 pub enum ActionSubcommand { 
     /// Invoke Specified command
-    Invoke(InvokeAction)
+    Invoke(InvokeAction),
+    /// Directly Invoke Specified command
+    DirectInvoke(DirectInvokeAction)
 }
 
 #[derive(Debug, Args)]
 pub struct InvokeAction {
+    /// name of the file
+    pub filename: String,
+}
+
+#[derive(Debug, Args)]
+pub struct DirectInvokeAction {
     /// Body of the command
     pub body: String,
     /// Path to execute command
@@ -61,8 +71,16 @@ pub struct InvokeAction {
 pub struct CreateFile {
     /// name of the file
     pub filename: String,
+}
+
+#[derive(Debug, Args)]
+pub struct AddCommand {
+    /// name of the file
+    pub filename: String,
     /// Body of the command
     pub body: String,
+    /// Path to execute command
+    pub path: String,
 }
 
 #[derive(Debug, Args)]
