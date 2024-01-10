@@ -1,84 +1,94 @@
 use std::{
-    fs::{self, File},
-    io::{self, BufRead, BufReader, Write},
+    fs::{self, File, OpenOptions},
+    io::{Read, Write},
+    path::Path,
 };
 
-use anyhow::{Context, Ok, Result as AnyResult};
+use crate::constants::filesystem_constants::DEFAULT_COMMANDS_DIRECTORY_PATH;
 
-use crate::{
-    constants::filesystem_constants::{
-        DEFAULT_COMMANDS_DIRECTORY_NAME, DEFAULT_COMMANDS_DIRECTORY_PATH,
-    },
-    models::command::{CreateFile, DeleteFile, ReadFile},
-};
-
-pub fn on_init() -> AnyResult<()> {
-    create_command_directory()
+pub fn on_init() {
+    create_command_directory();
+    println!("Init successfully")
 }
 
-pub fn create_command_file(command: CreateFile) -> AnyResult<()> {
-    let mut f = File::create(get_command_file_path(&command.filename)).with_context(|| {
-        format!(
-            "Error trying to create file with name {}",
-            &command.filename
-        )
-    })?;
+pub fn get_command_file(filename: &String) -> File {
+    let f = OpenOptions::new()
+        .read(true)
+        .append(true)
+        .truncate(false)
+        .open(get_command_file_path(filename));
 
-    f.write_all(command.body.as_bytes())
-        .with_context(|| format!("Error trying to write file with content {}", &command.body))?;
-
-    Ok(())
+    match f {
+        Ok(f) => {
+            println!("Get file successfully");
+            f
+        }
+        Err(err) => panic!("Failed to get file: {}", err),
+    }
 }
 
-pub fn delete_command_file(command: DeleteFile) -> AnyResult<()> {
-    fs::remove_file(get_command_file_path(&command.filename)).with_context(|| {
-        format!(
-            "Error trying to delete file with name {}",
-            &command.filename
-        )
-    })?;
-    Ok(())
+pub fn get_file_content(mut f: File) -> String {
+    let mut strbuf = String::new();
+    let result = f.read_to_string(&mut strbuf);
+    match result {
+        Ok(_) => {
+            println!("Data readed successfully");
+            strbuf
+        }
+        Err(err) => panic!("Failed to read data: {}", err),
+    }
 }
 
-pub fn read_command_file(command: ReadFile) -> AnyResult<()> {
-    let f = File::open(get_command_file_path(&command.filename))
-        .with_context(|| format!("could not find file with name `{}`", &command.filename))?;
+pub fn create_command_file(filename: &String) -> File {
+    let f = OpenOptions::new()
+        .read(true)
+        .write(true)
+        .create_new(true)
+        .open(get_command_file_path(filename));
 
-    let reader = BufReader::new(f);
+    match f {
+        Ok(f) => {
+            println!("File created");
+            f
+        }
+        Err(err) => panic!("Failed to create file: {}", err),
+    }
+}
 
-    for line in reader.lines() {
-        let res =
-            line.with_context(|| format!("could not read line with name `{}`", &command.filename))?;
+pub fn delete_command_file(filename: &String) {
+    let result = fs::remove_file(get_command_file_path(&filename));
+    match result {
+        Ok(_) => println!("File deleted successfully"),
+        Err(err) => panic!("Failed to write data: {}", err),
+    }
+}
 
-        write_to_console(&res)?;
+pub fn write_to_file(mut f: File, command: String) {
+    let result = f.write_all(command.as_bytes());
+
+    match result {
+        Ok(_) => println!("Data written successfully"),
+        Err(err) => panic!("Failed to write data: {}", err),
+    }
+}
+
+fn create_command_directory() {
+    let is_exist = Path::new(DEFAULT_COMMANDS_DIRECTORY_PATH).is_dir();
+
+    if is_exist {
+        return;
     }
 
-    Ok(())
-}
+    let result = fs::create_dir(DEFAULT_COMMANDS_DIRECTORY_PATH);
 
-fn write_to_console(str: &String) -> AnyResult<()> {
-    let stdout = io::stdout();
-
-    let mut handle = io::BufWriter::new(stdout);
-
-    writeln!(handle, "{}", str).with_context(|| format!("could not print line"))?;
-
-    Ok(())
-}
-
-fn create_command_directory() -> AnyResult<()> {
-    fs::create_dir_all(DEFAULT_COMMANDS_DIRECTORY_NAME).with_context(|| {
-        format!(
-            "Error trying to create directory with name {}",
-            DEFAULT_COMMANDS_DIRECTORY_NAME
-        )
-    })?;
-
-    Ok(())
+    match result {
+        Ok(_) => println!("Directory created successfully"),
+        Err(err) => panic!("Failed to create directory: {}", err),
+    }
 }
 
 fn get_command_file_path(filename: &String) -> String {
-    let command_file_path = format!("{}/{}.txt", DEFAULT_COMMANDS_DIRECTORY_PATH, filename);
+    let command_file_path = format!("./{}/{}.txt", DEFAULT_COMMANDS_DIRECTORY_PATH, filename);
 
     command_file_path
 }
