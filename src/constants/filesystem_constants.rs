@@ -1,1 +1,1 @@
-pub const DEFAULT_COMMANDS_DIRECTORY_PATH: &str = "./Commands";
+pub const DEFAULT_COMMANDS_DIRECTORY_PATH: &str = "./commands";
